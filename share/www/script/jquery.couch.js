@@ -20,7 +20,7 @@
       return "_design/" + encodeURIComponent(parts.join('/'));
     }
     return encodeURIComponent(docID);
-  };
+  }
 
   function prepareUserDoc(user_doc, new_password) {    
     if (typeof hex_sha1 == "undefined") {
@@ -39,7 +39,7 @@
       user_doc.roles = [];
     }
     return user_doc;
-  };
+  }
 
   var uuidCache = [];
 
@@ -75,7 +75,7 @@
         req.type = "PUT";
         req.data = toJSON(value);
         req.contentType = "application/json";
-        req.processData = false
+        req.processData = false;
       }
 
       ajax(req, options,
@@ -90,7 +90,7 @@
         complete: function(req) {
           var resp = $.httpData(req, "json");
           if (req.status == 200) {
-            if (options.success) options.success(resp);
+            if (options.success) { options.success(resp); }
           } else if (options.error) {
             options.error(req.status, resp.error, resp.reason);
           } else {
@@ -126,7 +126,7 @@
         complete: function(req) {
           var resp = $.httpData(req, "json");
           if (req.status == 200) {
-            if (options.success) options.success(resp);
+            if (options.success) { options.success(resp); }
           } else if (options.error) {
             options.error(req.status, resp.error, resp.reason);
           } else {
@@ -143,7 +143,7 @@
         complete: function(req) {
           var resp = $.httpData(req, "json");
           if (req.status == 200) {
-            if (options.success) options.success(resp);
+            if (options.success) { options.success(resp); }
           } else if (options.error) {
             options.error(req.status, resp.error, resp.reason);
           } else {
@@ -171,7 +171,8 @@
             return true;
           }
         }
-      };
+      }
+      
       return {
         name: name,
         uri: this.urlPrefix + "/" + encodeURIComponent(name) + "/",
@@ -248,7 +249,7 @@
             $.each(listeners, function() {
               this(resp);
             });
-          };
+          }
           // when there is a change, call any listeners, then check for another change
           options.success = function(resp) {
             timeout = 100;
@@ -256,7 +257,7 @@
               since = resp.last_seq;
               triggerListeners(resp);
               getChangesSince();
-            };
+            }
           };
           options.error = function() {
             if (active) {
@@ -292,10 +293,10 @@
         allDocs: function(options) {
           var type = "GET";
           var data = null;
-          if (options["keys"]) {
+          if (options.keys) {
             type = "POST";
-            var keys = options["keys"];
-            delete options["keys"];
+            var keys = options.keys;
+            delete options.keys;
             data = toJSON({ "keys": keys });
           }
           ajax({
@@ -328,7 +329,7 @@
                       } else if (ddoc._attachments && ddoc._attachments["index.html"]) {
                         appPath = ['', name, ddoc._id, "index.html"].join('/');
                       }
-                      if (appPath) options.eachApp(appName, appPath, ddoc);
+                      if (appPath) { options.eachApp(appName, appPath, ddoc); }
                     }
                   });
                 });
@@ -394,11 +395,11 @@
                     attachPrevRev : true,
                     success : function(d) {
                       doc._attachments = d._attachments;
-                      if (options.success) options.success(resp);
+                      if (options.success) { options.success(resp); }
                     }
                   });
                 } else {
-                  if (options.success) options.success(resp);
+                  if (options.success) { options.success(resp); }
                 }
               } else if (options.error) {
                 options.error(req.status, resp.error, resp.reason);
@@ -452,7 +453,7 @@
             complete: function(req) {
               var resp = $.httpData(req, "json");
               if (req.status == 201) {
-                if (options.success) options.success(resp);
+                if (options.success) { options.success(resp); }
               } else if (options.error) {
                 options.error(req.status, resp.error, resp.reason);
               } else {
@@ -476,8 +477,9 @@
           }
           var body = {language: language, map: mapFun};
           if (reduceFun != null) {
-            if (typeof(reduceFun) !== "string")
+            if (typeof(reduceFun) !== "string") {
               reduceFun = reduceFun.toSource ? reduceFun.toSource() : "(" + reduceFun.toString() + ")";
+            }
             body.reduce = reduceFun;
           }
           ajax({
@@ -490,14 +492,14 @@
           );
         },
         list: function(list, view, options) {
-          var list = list.split('/');
-          var options = options || {};
+          list = list.split('/');
+          options = options || {};
           var type = 'GET';
           var data = null;
-          if (options['keys']) {
+          if (options.keys) {
             type = 'POST';
-            var keys = options['keys'];
-            delete options['keys'];
+            var keys = options.keys;
+            delete options.keys;
             data = toJSON({'keys': keys });
           }
           ajax({
@@ -510,14 +512,14 @@
           );
         },
         view: function(name, options) {
-          var name = name.split('/');
-          var options = options || {};
+          name = name.split('/');
+          options = options || {};
           var type = "GET";
           var data= null;
-          if (options["keys"]) {
+          if (options.keys) {
             type = "POST";
-            var keys = options["keys"];
-            delete options["keys"];
+            var keys = options.keys;
+            delete options.keys;
             data = toJSON({ "keys": keys });
           }
           ajax({
@@ -607,8 +609,9 @@
         }
       },
       complete: function(req) {
+        var resp = null;
         try {
-          var resp = $.httpData(req, "json");
+          resp = $.httpData(req, "json");
         } catch(e) {
           if (options.error) {
             options.error(req.status, req, e);
@@ -621,8 +624,8 @@
           options.ajaxStart(resp);
         }
         if (req.status == options.successStatus) {
-          if (options.beforeSuccess) options.beforeSuccess(req, resp);
-          if (options.success) options.success(resp);
+          if (options.beforeSuccess) { options.beforeSuccess(req, resp); }
+          if (options.success) { options.success(resp); }
         } else if (options.error) {
           options.error(req.status, resp && resp.error || errorMessage, resp && resp.reason || "no response");
         } else {
@@ -633,7 +636,7 @@
   }
 
   function fullCommit(options) {
-    var options = options || {};
+    options = options || {};
     if (typeof options.ensure_full_commit !== "undefined") {
       var commit = options.ensure_full_commit;
       delete options.ensure_full_commit;
@@ -641,7 +644,7 @@
         xhr.setRequestHeader("X-Couch-Full-Commit", commit.toString());
       };
     }
-  };
+  }
 
   // Convert a options object to an url query string.
   // ex: {key:'value',key2:'value2'} becomes '?key="value"&key2="value2"'
@@ -649,8 +652,9 @@
     var buf = [];
     if (typeof(options) === "object" && options !== null) {
       for (var name in options) {
-        if ($.inArray(name, ["error", "success", "beforeSuccess", "ajaxStart"]) >= 0)
+        if ($.inArray(name, ["error", "success", "beforeSuccess", "ajaxStart"]) >= 0) {
           continue;
+        }
         var value = options[name];
         if ($.inArray(name, ["key", "startkey", "endkey"]) >= 0) {
           value = toJSON(value);
