@@ -30,6 +30,7 @@ start(_Type, DefaultIniFiles) ->
 stop(_) ->
     ok.
 
+%%Return commandline ini files or return Default.
 get_ini_files(Default) ->
     case init:get_argument(couch_ini) of
     error ->
@@ -42,6 +43,7 @@ get_ini_files(Default) ->
 
 start_apps([]) ->
     ok;
+%%Make sure the given Apps are running.
 start_apps([App|Rest]) ->
     case application:start(App) of
     ok ->

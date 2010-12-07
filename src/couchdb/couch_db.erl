@@ -664,7 +664,7 @@ update_docs(Db, Docs, Options, interactive_edit) ->
                 {[Doc | DocsAcc], NonRepDocsAcc}
             end
         end, {[], []}, Docs),
-        
+    
     DocBuckets = group_alike_docs(Docs2),
 
     case (Db#db.validate_doc_funs /= []) orelse

@@ -243,7 +243,7 @@ handle_request_int(MochiReq, DefaultFun,
         default_fun = DefaultFun,
         url_handlers = UrlHandlers
     },
-
+    % find the right handler function for this request using request path, list of handlers and the default handler
     HandlerFun = couch_util:dict_find(HandlerKey, UrlHandlers, DefaultFun),
 
     {ok, Resp} =
