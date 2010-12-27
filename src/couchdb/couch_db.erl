@@ -119,11 +119,13 @@ open_doc(Db, Id, Options) ->
     {ok, #doc{deleted=true}=Doc} ->
         case lists:member(deleted, Options) of
         true ->
-            apply_open_options({ok, Doc},Options);
+            apply_open_options({ok, Doc}, Options);
         false ->
             {not_found, deleted}
         end;
     Else ->
+        {_, Doc}=Else,
+        prep_and_validate_reads(Db, [Doc]),
         apply_open_options(Else,Options)
     end.
 
@@ -457,7 +459,25 @@ prep_and_validate_update(Db, #doc{id=Id,revs={RevStart, Revs}}=Doc,
         end
     end.
 
+validate_doc_read(Db, Doc) ->
+    JsonCtx = couch_util:json_user_ctx(Db),
+    SecObj = get_security(Db),
+    try [case Fun(Doc, JsonCtx, SecObj) of
+            ok -> ok;
+            Error -> throw(Error)
+        end || Fun <- Db#db.validate_doc_read_funs],
+        ok
+    catch
+        throw:Error ->
+            Error
+    end.
 
+prep_and_validate_reads(_, []) ->
+    ok;
+
+prep_and_validate_reads(Db, [Doc|RestDocs]) ->
+    validate_doc_read(Db, Doc),
+    prep_and_validate_reads(Db, RestDocs).
 
 prep_and_validate_updates(_Db, [], [], _AllowConflict, AccPrepped,
         AccFatalErrors) ->

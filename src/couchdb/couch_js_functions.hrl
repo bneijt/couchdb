@@ -168,3 +168,14 @@
         }
     }
 ">>).
+
+-define(REP_DB_DOC_READ_FUN, <<"
+    function(newDoc, oldDoc, userCtx) {
+    }
+">>).
+
+-define(AUTH_DB_DOC_READ_FUNCTION, <<"
+    function(document, userCtx) {
+    }
+">>).
+

@@ -17,7 +17,7 @@
 
 -export([init/1, terminate/2, handle_call/3, handle_cast/2, handle_info/2,code_change/3]).
 -export([start_doc_map/3, map_docs/2, stop_doc_map/1]).
--export([reduce/3, rereduce/3,validate_doc_update/5]).
+-export([reduce/3, rereduce/3,validate_doc_update/5,validate_doc_read/4]).
 -export([filter_docs/5]).
 
 -export([with_ddoc_proc/2, proc_prompt/2, ddoc_prompt/3, ddoc_proc_prompt/3, json_doc/1]).
@@ -224,6 +224,19 @@ validate_doc_update(DDoc, EditDoc, DiskDoc, Ctx, SecObj) ->
         {[{<<"unauthorized">>, Message}]} ->
             throw({unauthorized, Message})
     end.
+
+% use the function stored in ddoc.validate_doc_update to test an update.
+validate_doc_read(DDoc, ReadDoc, Ctx, SecObj) ->
+    JsonReadDoc = couch_doc:to_json_obj(ReadDoc, [revs]),
+    case ddoc_prompt(DDoc, [<<"validate_doc_read">>], [JsonReadDoc, Ctx, SecObj]) of
+        1 ->
+            ok;
+        {[{<<"forbidden">>, Message}]} ->
+            throw({forbidden, Message});
+        {[{<<"unauthorized">>, Message}]} ->
+            throw({unauthorized, Message})
+    end.
+
 
 json_doc(nil) -> null;
 json_doc(Doc) ->

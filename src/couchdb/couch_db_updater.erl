@@ -45,7 +45,8 @@ init({MainPid, DbName, Filepath, Fd, Options}) ->
 
     Db = init_db(DbName, Filepath, Fd, Header),
     Db2 = refresh_validate_doc_funs(Db),
-    {ok, Db2#db{main_pid = MainPid, is_sys_db = lists:member(sys_db, Options)}}.
+    Db3 = refresh_validate_doc_read_funs(Db2),
+    {ok, Db3#db{main_pid = MainPid, is_sys_db = lists:member(sys_db, Options)}}.
 
 
 terminate(_Reason, Db) ->
@@ -187,9 +188,10 @@ handle_cast({compact_done, CompactFilepath}, #db{filepath=Filepath}=Db) ->
         ok = file:rename(CompactFilepath, Filepath),
         close_db(Db),
         NewDb3 = refresh_validate_doc_funs(NewDb2),
-        ok = gen_server:call(Db#db.main_pid, {db_updated, NewDb3}, infinity),
+        NewDb4 = refresh_validate_doc_read_funs(NewDb3),
+        ok = gen_server:call(Db#db.main_pid, {db_updated, NewDb4}, infinity),
         ?LOG_INFO("Compaction for db \"~s\" completed.", [Db#db.name]),
-        {noreply, NewDb3#db{compactor_pid=nil}};
+        {noreply, NewDb4#db{compactor_pid=nil}};
     false ->
         ?LOG_INFO("Compaction file still behind main file "
             "(update seq=~p. compact update seq=~p). Retrying.",
@@ -438,6 +440,17 @@ refresh_validate_doc_funs(Db) ->
         end, DesignDocs),
     Db#db{validate_doc_funs=ProcessDocFuns}.
 
+refresh_validate_doc_read_funs(Db) ->
+    {ok, DesignDocs} = couch_db:get_design_docs(Db),
+    ProcessDocFuns = lists:flatmap(
+        fun(DesignDoc) ->
+            case couch_doc:get_validate_doc_read_fun(DesignDoc) of
+            nil -> [];
+            Fun -> [Fun]
+            end
+        end, DesignDocs),
+    Db#db{validate_doc_read_funs=ProcessDocFuns}.
+
 % rev tree functions
 
 flush_trees(_Db, [], AccFlushedTrees) ->
@@ -624,12 +637,13 @@ update_docs_int(Db, DocsList, NonRepDocs, MergeConflicts, FullCommit) ->
     % funs if we did.
     case [1 || <<"_design/",_/binary>> <- Ids] of
     [] ->
-        Db4 = Db3;
+        Db5 = Db3;
     _ ->
-        Db4 = refresh_validate_doc_funs(Db3)
+        Db4 = refresh_validate_doc_funs(Db3),
+        Db5 = refresh_validate_doc_read_funs(Db4)
     end,
 
-    {ok, commit_data(Db4, not FullCommit)}.
+    {ok, commit_data(Db5, not FullCommit)}.
 
 
 update_local_docs(#db{local_docs_btree=Btree}=Db, Docs) ->

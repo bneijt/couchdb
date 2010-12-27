@@ -405,6 +405,7 @@ auth_design_doc(DocId) ->
     DocProps = [
         {<<"_id">>, DocId},
         {<<"language">>,<<"javascript">>},
-        {<<"validate_doc_update">>, ?AUTH_DB_DOC_VALIDATE_FUNCTION}
+        {<<"validate_doc_update">>, ?AUTH_DB_DOC_VALIDATE_FUNCTION},
+        {<<"validate_doc_read">>, ?AUTH_DB_DOC_READ_FUNCTION}
     ],
     {ok, couch_doc:from_json_obj({DocProps})}.

@@ -18,5 +18,13 @@ var Validate = {
     } catch (error) {
       respond(error);
     }
+  },
+  validate_read : function(fun, ddoc, args) {
+    try {
+      fun.apply(ddoc, args);
+      print("1");
+    } catch (error) {
+      respond(error);
+    }
   }
 };
