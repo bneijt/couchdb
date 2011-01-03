@@ -63,7 +63,7 @@ start_link(Name, Options) ->
     DefaultFun = make_arity_1_fun(
         couch_config:get("httpd", "default_handler", DefaultSpec)
     ),
-    
+
     UrlHandlersList = lists:map(
         fun({UrlKey, SpecStr}) ->
             {?l2b(UrlKey), make_arity_1_fun(SpecStr)}
@@ -126,7 +126,6 @@ start_link(Name, Options) ->
 % SpecStr is a string like "{my_module, my_fun}"
 %  or "{my_module, my_fun, <<"my_arg">>}"
 make_arity_1_fun(SpecStr) ->
-    ?LOG_INFO("couchdb_httpd:make_arity_1_fun: ~s", [SpecStr]),
     case couch_util:parse_term(SpecStr) of
     {ok, {Mod, Fun, SpecArg}} ->
         fun(Arg) -> Mod:Fun(Arg, SpecArg) end;
